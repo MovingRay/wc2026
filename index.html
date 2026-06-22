@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>世界杯 2026 预测系统</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+  <link href="assets/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --pitch:#0b5e3c; --pitch-deep:#06301d; --navy:#0d3b66;
+      --gold:#e9b949; --gold-deep:#c98f1b;
+      --ink:#1c2733; --muted:#6b7a8c; --line:#e6ebf1;
+      --ok:#1f9d61; --bad:#c0564f; --mid:#c3cbd4;
+      --card-shadow:0 1px 2px rgba(16,24,40,.06),0 6px 16px rgba(16,24,40,.05);
+    }
+    body{ background:#f2f4f7; color:var(--ink);
+      font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif; }
+    .num{ font-variant-numeric:tabular-nums; }
+
+    /* ── 头部横幅 ─────────────────────────────────────────── */
+    .hero{ background:linear-gradient(125deg,var(--pitch-deep) 0%,var(--pitch) 52%,var(--navy) 100%);
+      color:#fff; padding:1.1rem 0 .9rem; box-shadow:0 2px 14px rgba(6,48,29,.35); }
+    .hero h1{ font-size:1.25rem; font-weight:800; letter-spacing:.02em; margin:0; }
+    .hero .sub{ color:rgba(255,255,255,.66); font-size:.78rem; margin-top:.15rem; }
+    .hero .nav-pills{ gap:.3rem; }
+    .hero .nav-link{ color:rgba(255,255,255,.78); font-size:.86rem; font-weight:600;
+      padding:.32rem .85rem; border-radius:999px; border:1px solid rgba(255,255,255,.22); }
+    .hero .nav-link:hover{ color:#fff; border-color:rgba(255,255,255,.5); }
+    .hero .nav-link.active{ background:var(--gold); border-color:var(--gold); color:#3a2c05; }
+
+    /* ── 通用卡片 ─────────────────────────────────────────── */
+    .panel{ background:#fff; border:1px solid var(--line); border-radius:14px;
+      box-shadow:var(--card-shadow); }
+    .fl{ height:.95em; width:auto; border-radius:2px; vertical-align:-.08em;
+      box-shadow:0 0 0 1px rgba(16,24,40,.08); }
+    .daily{ background:#fff8e8; border:1px solid #f3e3b3; border-left:4px solid var(--gold);
+      border-radius:10px; padding:.55rem .8rem; font-size:.86rem; }
+    .method summary{ cursor:pointer; font-weight:700; font-size:.9rem; }
+    .method summary::marker{ color:var(--gold-deep); }
+
+    /* ── 三甲领奖台 ───────────────────────────────────────── */
+    .podium{ position:relative; overflow:hidden; text-align:center; padding:.8rem .4rem .7rem; }
+    .podium::before{ content:""; position:absolute; inset:0 0 auto 0; height:4px; }
+    .p1::before{ background:linear-gradient(90deg,#f6d365,#d4a017); }
+    .p2::before{ background:linear-gradient(90deg,#d7dde4,#9aa7b4); }
+    .p3::before{ background:linear-gradient(90deg,#e8b78c,#b0713c); }
+    .podium .medal{ font-size:1.05rem; }
+    .podium .lbl{ font-size:.72rem; color:var(--muted); letter-spacing:.06em; }
+    .podium .tname{ font-size:1.06rem; font-weight:800; margin:.1rem 0; }
+    .podium .tname .fl{ height:1em; margin-right:.3rem; }
+    .podium .pct{ font-size:1.25rem; font-weight:800; }
+    .p1 .pct{ color:var(--gold-deep); } .p2 .pct{ color:#75838f; } .p3 .pct{ color:#a96a39; }
+
+    /* ── 排行榜表 ─────────────────────────────────────────── */
+    .rank-table{ font-size:.875rem; margin-bottom:.6rem; }
+    .rank-table thead th{ font-size:.74rem; color:var(--muted); font-weight:700;
+      text-transform:uppercase; letter-spacing:.04em; border-bottom:2px solid var(--line); }
+    .rank-table td{ border-color:#eef1f5; }
+    .rank-table tbody tr:hover{ background:#f7f9fb; }
+    .rk{ display:inline-flex; width:1.45rem; height:1.45rem; border-radius:50%; font-size:.74rem;
+      font-weight:800; align-items:center; justify-content:center; background:#eef1f5; color:var(--muted); }
+    .rk-1{ background:linear-gradient(135deg,#f6d365,#d4a017); color:#3a2c05; }
+    .rk-2{ background:linear-gradient(135deg,#e2e8ee,#9aa7b4); color:#2c3640; }
+    .rk-3{ background:linear-gradient(135deg,#e8b78c,#b0713c); color:#3d2412; }
+    .pbar{ position:relative; min-width:5.2rem; }
+    .pbar i{ position:absolute; left:0; top:50%; transform:translateY(-50%); height:1.25rem;
+      background:linear-gradient(90deg,rgba(233,185,73,.38),rgba(233,185,73,.10));
+      border-radius:4px; z-index:0; }
+    .pbar b{ position:relative; z-index:1; padding-left:.3rem; }
+
+    /* ── 小组卡 ───────────────────────────────────────────── */
+    .gcard{ padding:.55rem .7rem; height:100%; }
+    .gchip{ display:inline-flex; width:1.35rem; height:1.35rem; border-radius:6px;
+      background:var(--pitch); color:#fff; font-size:.76rem; font-weight:800;
+      align-items:center; justify-content:center; margin-right:.35rem; }
+    .gcard .trow{ display:flex; justify-content:space-between; align-items:center;
+      font-size:.82rem; padding:.12rem 0; }
+    .gcard .trow .fl{ margin-right:.3rem; }
+    .gcard .mini{ flex:1; height:3px; background:#eef1f5; border-radius:2px; margin:0 .5rem; overflow:hidden; }
+    .gcard .mini i{ display:block; height:100%; background:var(--ok); border-radius:2px; }
+
+    /* ── 赛中更新（管理员） ───────────────────────────────── */
+    .admin-card{ border-left:4px solid var(--pitch); padding:.8rem .9rem; }
+    .admin-card textarea{ font-family:ui-monospace,Consolas,monospace; font-size:.84rem; }
+    .btn-pitch{ background:var(--pitch); border-color:var(--pitch); color:#fff; font-weight:600; }
+    .btn-pitch:hover{ background:#0a4f33; border-color:#0a4f33; color:#fff; }
+    .readonly-note{ background:#f3f6f9; border:1px dashed #cfd9e3; border-radius:10px;
+      padding:.6rem .8rem; font-size:.84rem; color:var(--muted); }
+
+    /* ── 逐场预测 ─────────────────────────────────────────── */
+    .wdl{ display:flex; height:6px; border-radius:3px; overflow:hidden; min-width:4.6rem; margin-bottom:2px; }
+    .wdl .w{ background:var(--ok); } .wdl .d{ background:var(--mid); } .wdl .l{ background:var(--bad); }
+    .wdl-txt{ font-size:.74rem; color:var(--muted); }
+    .score-chip{ display:inline-block; font-family:ui-monospace,Consolas,monospace; font-weight:700;
+      font-size:.8rem; background:#eef4f0; border:1px solid #d8e6dd; border-radius:6px; padding:0 .35rem; }
+    .alt-badge{ font-size:.74rem; color:#2a7fa8; background:#e8f4fa; border-radius:6px; padding:.05rem .35rem; }
+    .ts{ display:inline-block; font-family:ui-monospace,Consolas,monospace; font-size:.74rem; font-weight:700;
+      border-radius:6px; padding:0 .3rem; margin-right:.15rem; border:1px solid; white-space:nowrap; }
+    .ts i{ font-style:normal; font-weight:600; opacity:.75; font-size:.68rem; }
+    .ts-h{ color:#187a4b; background:#edf7f1; border-color:#cfe8da; }
+    .ts-d{ color:#5d6b79; background:#f1f4f7; border-color:#dee5ec; }
+    .ts-a{ color:#a14842; background:#faf0ef; border-color:#eed7d4; }
+    .ts-line{ font-size:.72rem; color:var(--muted); }
+    .ko-line{ font-size:.72rem; color:var(--muted); margin-top:1px; }
+    .ko-line b{ color:var(--pitch); font-weight:700; }
+    .act{ font-family:ui-monospace,Consolas,monospace; font-weight:800; font-size:.8rem;
+      border-radius:6px; padding:0 .35rem; }
+    .act-ok{ color:#187a4b; background:#e3f3ea; }
+    .act-miss{ color:#a14842; background:#f7e9e8; }
+    tr.played td{ background:#f6faf7; }
+
+    /* ── 对阵树 ───────────────────────────────────────────── */
+    .champ-hero{ background:linear-gradient(120deg,#3a2c05,#6e5410 45%,#a8821e);
+      color:#fff; border-radius:14px; padding:.9rem 1.1rem; box-shadow:var(--card-shadow); }
+    .champ-hero .big{ font-size:1.3rem; font-weight:800; }
+    .champ-hero .fl{ height:1.05em; }
+    .round-pill{ display:inline-block; font-size:.78rem; font-weight:800; color:var(--pitch);
+      background:#e7f2ec; border-radius:999px; padding:.15rem .7rem; margin-bottom:.45rem; }
+    .bracket-match{ background:#fff; border:1px solid var(--line); border-radius:10px;
+      padding:.45rem .6rem; margin-bottom:.45rem; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+    .bracket-match .side{ display:flex; justify-content:space-between; align-items:center;
+      padding:.1rem .3rem; border-radius:6px; font-size:.84rem; }
+    .bracket-match .side .fl{ margin-right:.32rem; }
+    .side.win{ font-weight:700; background:rgba(31,157,97,.08); }
+    .side.win .tick{ color:var(--ok); font-weight:800; }
+    .side.lose{ color:#9aa7b4; }
+    .reach{ color:#9aa7b4; font-size:.72rem; }
+    .adv-chip{ display:inline-block; font-size:.76rem; background:#f4f7f5; border:1px solid #dde7e1;
+      border-radius:999px; padding:.05rem .5rem; }
+    .footer-note{ color:var(--muted); font-size:.78rem; }
+  </style>
+</head>
+<body>
+
+<header class="hero mb-3">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h1>⚽ 世界杯 2026 · 预测系统</h1>
+        <div class="sub">Dixon-Coles 多信号分析 ⊕ 博彩市场 · 蒙特卡洛 20,000 次全赛事模拟</div>
+      </div>
+      <ul class="nav nav-pills">
+        <li class="nav-item"><a class="nav-link active" href="index.html">夺冠总览</a></li>
+        <li class="nav-item"><a class="nav-link " href="fixtures.html">逐场预测</a></li>
+        <li class="nav-item"><a class="nav-link " href="bracket.html">对阵树</a></li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<div class="container pb-4">
+  <div class="daily mb-3" style="background:#eef4f0;border-color:#cfe0d6;border-left-color:var(--pitch)"><b>🔒 只读分享快照</b> · 数据更新于 2026-06-22 · 已条件化 39 场 · 纯数据分析、娱乐参考（实时改动在管理员本机）</div>
+
+  
+  <div class="daily mb-3"><b>📅 今日提醒 · 小组赛进行中：</b>每天把已踢比分填进『赛中更新』；每 2-3 天 fetch_odds.py 刷盘口。6/27 收官后淘汰赛盘口会挂出，记得再刷一次。</div>
+  
+
+  
+  
+  <p class="text-muted small mb-2">统一加权答案 = <b>我的多信号独立分析（DC+身价+FIFA）× 50%</b>
+    ⊕ <b>博彩市场 × 50%</b>，校准成一个连贯模型 → 夺冠/晋级自洽。
+    1,575 场历史大赛回测 RPS 0.1913 打过所有基线（世界杯单项对照 0.198，与博彩持平）。
+    <span class="badge" style="background:var(--ok)">已条件化 39 场结果</span></p>
+  
+
+  <details class="method panel mb-3 p-2 px-3">
+    <summary>ℹ️ 这是怎么算出来的？（点开看：数据 / 模型 / 准不准）</summary>
+    <div class="small mt-2">
+      <p class="mb-1"><b>🗂️ 抓了哪些数据</b>：① 49,000+ 场国际比赛结果(1872–2026) ② 博彩市场盘(优先最锐利的 <b>Pinnacle</b>) ③ 球员阵容身价(Transfermarkt) ④ FIFA 排名 ⑤ 近期 6 大赛<b>真实 xG</b>(StatsBomb 314 场) ⑥ 实时伤停/状态新闻。</p>
+      <p class="mb-1"><b>🧮 用了什么模型</b>：<b>Dixon-Coles</b> 双变量泊松比分模型 + <b>Elo</b> 评分，再用<b>蒙特卡洛</b>把整届世界杯模拟 2 万次 → 每队夺冠/出线概率。</p>
+      <p class="mb-1"><b>🔬 怎么分析</b>：把"我的多信号独立分析（数据驱动、<b>不抄盘</b>）"与"博彩市场"各取一半融合，校准成一个连贯模型；再叠加唯一经客观验证<b>有效</b>的 xG 状态信号 + 当前伤停修正。每场预测的胜者与比分口径恒一致。</p>
+      <p class="mb-1"><b>🎯 准不准（不粉饰）</b>：在 <b>1,575 场历史大赛</b>上严格留出验证（模型没见过这些比赛）：<b>RPS 0.1913，打过所有基线、追平职业博彩</b>（博彩盘≈理论上限）。胜平负能叫对约 <b>55%</b> —— 这已是足球的极限（约 1/4 是平局 + 时有冷门）。</p>
+      <p class="mb-0 text-muted">⚠️ 它给的是<b>靠谱的概率/赔率</b>，不是"包对每一场"：它说 60% 的事长期看真发生约 60%；但<b>精确比分谁也测不准</b>（任何比分概率才十几个点）。纯数据分析、娱乐参考。</p>
+    </div>
+  </details>
+
+  <div class="row g-2 mb-3">
+    
+    <div class="col-4">
+      <div class="panel podium p1">
+        <div class="medal">🥇</div>
+        <div class="lbl">冠军预测</div>
+        <div class="tname"><img class="fl" src="flags/h40-es.png" alt="" loading="lazy" onerror="this.style.display='none'">西班牙</div>
+        <div class="pct num">16.3%</div>
+      </div>
+    </div>
+    
+    <div class="col-4">
+      <div class="panel podium p2">
+        <div class="medal">🥈</div>
+        <div class="lbl">亚军热门</div>
+        <div class="tname"><img class="fl" src="flags/h40-ar.png" alt="" loading="lazy" onerror="this.style.display='none'">阿根廷</div>
+        <div class="pct num">15.6%</div>
+      </div>
+    </div>
+    
+    <div class="col-4">
+      <div class="panel podium p3">
+        <div class="medal">🥉</div>
+        <div class="lbl">季军热门</div>
+        <div class="tname"><img class="fl" src="flags/h40-fr.png" alt="" loading="lazy" onerror="this.style.display='none'">法国</div>
+        <div class="pct num">15.4%</div>
+      </div>
+    </div>
+    
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="panel p-3">
+        <h6 class="fw-bold mb-2">🏆 夺冠 / 晋级概率（Top 18）</h6>
+        <table class="table table-sm align-middle rank-table num">
+          <thead><tr><th>#</th><th>队</th><th>夺冠</th><th>进决赛</th><th>进4强</th><th>出线</th><th class="text-muted">市场</th></tr></thead>
+          <tbody>
+          
+            <tr><td><span class="rk rk-1">1</span></td>
+              <td><img class="fl" src="flags/h20-es.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>西班牙</b></td>
+              <td class="pbar"><i style="width:100%"></i><b>16.3%</b></td>
+              <td>26%</td>
+              <td>40%</td><td>100%</td>
+              <td class="text-muted">14.8%</td></tr>
+          
+            <tr><td><span class="rk rk-2">2</span></td>
+              <td><img class="fl" src="flags/h20-ar.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>阿根廷</b></td>
+              <td class="pbar"><i style="width:96%"></i><b>15.6%</b></td>
+              <td>26%</td>
+              <td>42%</td><td>100%</td>
+              <td class="text-muted">10.1%</td></tr>
+          
+            <tr><td><span class="rk rk-3">3</span></td>
+              <td><img class="fl" src="flags/h20-fr.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>法国</b></td>
+              <td class="pbar"><i style="width:95%"></i><b>15.4%</b></td>
+              <td>25%</td>
+              <td>39%</td><td>100%</td>
+              <td class="text-muted">18.0%</td></tr>
+          
+            <tr><td><span class="rk rk-n">4</span></td>
+              <td><img class="fl" src="flags/h20-gb-eng.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>英格兰</b></td>
+              <td class="pbar"><i style="width:69%"></i><b>11.2%</b></td>
+              <td>20%</td>
+              <td>32%</td><td>100%</td>
+              <td class="text-muted">11.8%</td></tr>
+          
+            <tr><td><span class="rk rk-n">5</span></td>
+              <td><img class="fl" src="flags/h20-pt.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>葡萄牙</b></td>
+              <td class="pbar"><i style="width:39%"></i><b>6.3%</b></td>
+              <td>12%</td>
+              <td>23%</td><td>87%</td>
+              <td class="text-muted">7.7%</td></tr>
+          
+            <tr><td><span class="rk rk-n">6</span></td>
+              <td><img class="fl" src="flags/h20-de.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>德国</b></td>
+              <td class="pbar"><i style="width:33%"></i><b>5.4%</b></td>
+              <td>11%</td>
+              <td>22%</td><td>100%</td>
+              <td class="text-muted">5.6%</td></tr>
+          
+            <tr><td><span class="rk rk-n">7</span></td>
+              <td><img class="fl" src="flags/h20-br.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>巴西</b></td>
+              <td class="pbar"><i style="width:31%"></i><b>5.0%</b></td>
+              <td>11%</td>
+              <td>19%</td><td>100%</td>
+              <td class="text-muted">6.5%</td></tr>
+          
+            <tr><td><span class="rk rk-n">8</span></td>
+              <td><img class="fl" src="flags/h20-nl.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>荷兰</b></td>
+              <td class="pbar"><i style="width:22%"></i><b>3.5%</b></td>
+              <td>8%</td>
+              <td>16%</td><td>100%</td>
+              <td class="text-muted">5.6%</td></tr>
+          
+            <tr><td><span class="rk rk-n">9</span></td>
+              <td><img class="fl" src="flags/h20-ma.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>摩洛哥</b></td>
+              <td class="pbar"><i style="width:18%"></i><b>2.9%</b></td>
+              <td>7%</td>
+              <td>14%</td><td>100%</td>
+              <td class="text-muted">1.9%</td></tr>
+          
+            <tr><td><span class="rk rk-n">10</span></td>
+              <td><img class="fl" src="flags/h20-no.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>挪威</b></td>
+              <td class="pbar"><i style="width:16%"></i><b>2.5%</b></td>
+              <td>6%</td>
+              <td>14%</td><td>97%</td>
+              <td class="text-muted">2.2%</td></tr>
+          
+            <tr><td><span class="rk rk-n">11</span></td>
+              <td><img class="fl" src="flags/h20-co.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>哥伦比亚</b></td>
+              <td class="pbar"><i style="width:12%"></i><b>2.0%</b></td>
+              <td>5%</td>
+              <td>13%</td><td>95%</td>
+              <td class="text-muted">1.5%</td></tr>
+          
+            <tr><td><span class="rk rk-n">12</span></td>
+              <td><img class="fl" src="flags/h20-jp.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>日本</b></td>
+              <td class="pbar"><i style="width:11%"></i><b>1.7%</b></td>
+              <td>4%</td>
+              <td>10%</td><td>100%</td>
+              <td class="text-muted">1.9%</td></tr>
+          
+            <tr><td><span class="rk rk-n">13</span></td>
+              <td><img class="fl" src="flags/h20-us.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>美国🏠</b></td>
+              <td class="pbar"><i style="width:9%"></i><b>1.5%</b></td>
+              <td>4%</td>
+              <td>12%</td><td>100%</td>
+              <td class="text-muted">2.2%</td></tr>
+          
+            <tr><td><span class="rk rk-n">14</span></td>
+              <td><img class="fl" src="flags/h20-ch.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>瑞士</b></td>
+              <td class="pbar"><i style="width:7%"></i><b>1.1%</b></td>
+              <td>3%</td>
+              <td>9%</td><td>100%</td>
+              <td class="text-muted">0.9%</td></tr>
+          
+            <tr><td><span class="rk rk-n">15</span></td>
+              <td><img class="fl" src="flags/h20-be.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>比利时</b></td>
+              <td class="pbar"><i style="width:7%"></i><b>1.1%</b></td>
+              <td>4%</td>
+              <td>9%</td><td>81%</td>
+              <td class="text-muted">1.5%</td></tr>
+          
+            <tr><td><span class="rk rk-n">16</span></td>
+              <td><img class="fl" src="flags/h20-hr.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>克罗地亚</b></td>
+              <td class="pbar"><i style="width:6%"></i><b>0.9%</b></td>
+              <td>2%</td>
+              <td>6%</td><td>76%</td>
+              <td class="text-muted">0.7%</td></tr>
+          
+            <tr><td><span class="rk rk-n">17</span></td>
+              <td><img class="fl" src="flags/h20-mx.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>墨西哥🏠</b></td>
+              <td class="pbar"><i style="width:5%"></i><b>0.9%</b></td>
+              <td>3%</td>
+              <td>7%</td><td>100%</td>
+              <td class="text-muted">1.4%</td></tr>
+          
+            <tr><td><span class="rk rk-n">18</span></td>
+              <td><img class="fl" src="flags/h20-ci.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>科特迪瓦</b></td>
+              <td class="pbar"><i style="width:5%"></i><b>0.8%</b></td>
+              <td>2%</td>
+              <td>6%</td><td>94%</td>
+              <td class="text-muted">0.7%</td></tr>
+          
+          </tbody>
+        </table>
+        <img src="championship_2026.png" class="img-fluid border rounded" alt="三方对照图"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='none'">
+        <p class="small text-muted mb-0">三方对照为<b>赛前快照</b>（生成于开赛前），赛中条件化更新不刷新此图；以上表为准。</p>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      
+      <div class="readonly-note mb-3">👀 你正在<b>只读</b>查看；战况由管理员更新，刷新即见最新预测。</div>
+      
+      
+      <div class="panel p-2 px-3 mb-3 small num">
+        📊 <b>赛果对账</b>（已赛 39 场 · 按赛前预测口径）：
+        胜平负命中 <b>22/39</b> ·
+        实际比分进 Top3 <b>13/39</b> ·
+        头牌比分全中 <b>5/39</b><br>
+        滚动 RPS <b>0.155</b>
+        <span class="text-muted">（越低越好；博彩长期基准≈0.199——样本小，别过度解读）</span>
+        <a href="fixtures.html" class="text-decoration-none">逐场明细 →</a>
+      </div>
+      
+      <h6 class="fw-bold">各组出线概率</h6>
+      <div class="row row-cols-2 g-2">
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">A</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-mx.png" alt="" loading="lazy" onerror="this.style.display='none'">墨西哥🏠</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-za.png" alt="" loading="lazy" onerror="this.style.display='none'">南非</span><span class="mini"><i style="width:29%"></i></span><span>29%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-kr.png" alt="" loading="lazy" onerror="this.style.display='none'">韩国</span><span class="mini"><i style="width:86%"></i></span><span>86%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-cz.png" alt="" loading="lazy" onerror="this.style.display='none'">捷克</span><span class="mini"><i style="width:29%"></i></span><span>29%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">B</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-ca.png" alt="" loading="lazy" onerror="this.style.display='none'">加拿大🏠</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-ba.png" alt="" loading="lazy" onerror="this.style.display='none'">波黑</span><span class="mini"><i style="width:56%"></i></span><span>56%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-qa.png" alt="" loading="lazy" onerror="this.style.display='none'">卡塔尔</span><span class="mini"><i style="width:23%"></i></span><span>23%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-ch.png" alt="" loading="lazy" onerror="this.style.display='none'">瑞士</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">C</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-br.png" alt="" loading="lazy" onerror="this.style.display='none'">巴西</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-ma.png" alt="" loading="lazy" onerror="this.style.display='none'">摩洛哥</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-ht.png" alt="" loading="lazy" onerror="this.style.display='none'">海地</span><span class="mini"><i style="width:3%"></i></span><span>3%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-gb-sct.png" alt="" loading="lazy" onerror="this.style.display='none'">苏格兰</span><span class="mini"><i style="width:76%"></i></span><span>76%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">D</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-us.png" alt="" loading="lazy" onerror="this.style.display='none'">美国🏠</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-py.png" alt="" loading="lazy" onerror="this.style.display='none'">巴拉圭</span><span class="mini"><i style="width:78%"></i></span><span>78%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-au.png" alt="" loading="lazy" onerror="this.style.display='none'">澳大利亚</span><span class="mini"><i style="width:86%"></i></span><span>86%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-tr.png" alt="" loading="lazy" onerror="this.style.display='none'">土耳其</span><span class="mini"><i style="width:15%"></i></span><span>15%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">E</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-de.png" alt="" loading="lazy" onerror="this.style.display='none'">德国</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-cw.png" alt="" loading="lazy" onerror="this.style.display='none'">库拉索</span><span class="mini"><i style="width:13%"></i></span><span>13%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-ci.png" alt="" loading="lazy" onerror="this.style.display='none'">科特迪瓦</span><span class="mini"><i style="width:94%"></i></span><span>94%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-ec.png" alt="" loading="lazy" onerror="this.style.display='none'">厄瓜多尔</span><span class="mini"><i style="width:29%"></i></span><span>29%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">F</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-nl.png" alt="" loading="lazy" onerror="this.style.display='none'">荷兰</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-jp.png" alt="" loading="lazy" onerror="this.style.display='none'">日本</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-se.png" alt="" loading="lazy" onerror="this.style.display='none'">瑞典</span><span class="mini"><i style="width:92%"></i></span><span>92%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-tn.png" alt="" loading="lazy" onerror="this.style.display='none'">突尼斯</span><span class="mini"><i style="width:0%"></i></span><span>0%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">G</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-be.png" alt="" loading="lazy" onerror="this.style.display='none'">比利时</span><span class="mini"><i style="width:81%"></i></span><span>81%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-eg.png" alt="" loading="lazy" onerror="this.style.display='none'">埃及</span><span class="mini"><i style="width:77%"></i></span><span>77%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-ir.png" alt="" loading="lazy" onerror="this.style.display='none'">伊朗</span><span class="mini"><i style="width:59%"></i></span><span>59%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-nz.png" alt="" loading="lazy" onerror="this.style.display='none'">新西兰</span><span class="mini"><i style="width:44%"></i></span><span>44%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">H</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-es.png" alt="" loading="lazy" onerror="this.style.display='none'">西班牙</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-cv.png" alt="" loading="lazy" onerror="this.style.display='none'">佛得角</span><span class="mini"><i style="width:70%"></i></span><span>70%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-sa.png" alt="" loading="lazy" onerror="this.style.display='none'">沙特阿拉伯</span><span class="mini"><i style="width:30%"></i></span><span>30%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-uy.png" alt="" loading="lazy" onerror="this.style.display='none'">乌拉圭</span><span class="mini"><i style="width:45%"></i></span><span>45%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">I</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-fr.png" alt="" loading="lazy" onerror="this.style.display='none'">法国</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-sn.png" alt="" loading="lazy" onerror="this.style.display='none'">塞内加尔</span><span class="mini"><i style="width:61%"></i></span><span>61%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-iq.png" alt="" loading="lazy" onerror="this.style.display='none'">伊拉克</span><span class="mini"><i style="width:11%"></i></span><span>11%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-no.png" alt="" loading="lazy" onerror="this.style.display='none'">挪威</span><span class="mini"><i style="width:97%"></i></span><span>97%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">J</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-ar.png" alt="" loading="lazy" onerror="this.style.display='none'">阿根廷</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-dz.png" alt="" loading="lazy" onerror="this.style.display='none'">阿尔及利亚</span><span class="mini"><i style="width:59%"></i></span><span>59%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-at.png" alt="" loading="lazy" onerror="this.style.display='none'">奥地利</span><span class="mini"><i style="width:95%"></i></span><span>95%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-jo.png" alt="" loading="lazy" onerror="this.style.display='none'">约旦</span><span class="mini"><i style="width:17%"></i></span><span>17%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">K</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-pt.png" alt="" loading="lazy" onerror="this.style.display='none'">葡萄牙</span><span class="mini"><i style="width:87%"></i></span><span>87%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-cd.png" alt="" loading="lazy" onerror="this.style.display='none'">刚果(金)</span><span class="mini"><i style="width:65%"></i></span><span>65%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-uz.png" alt="" loading="lazy" onerror="this.style.display='none'">乌兹别克斯坦</span><span class="mini"><i style="width:27%"></i></span><span>27%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-co.png" alt="" loading="lazy" onerror="this.style.display='none'">哥伦比亚</span><span class="mini"><i style="width:95%"></i></span><span>95%</span></div>
+        </div></div>
+      
+        <div class="col"><div class="panel gcard"><div class="mb-1"><span class="gchip">L</span><b class="small">组</b></div>
+          <div class="trow num"><span><img class="fl" src="flags/h20-gb-eng.png" alt="" loading="lazy" onerror="this.style.display='none'">英格兰</span><span class="mini"><i style="width:100%"></i></span><span>100%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-hr.png" alt="" loading="lazy" onerror="this.style.display='none'">克罗地亚</span><span class="mini"><i style="width:76%"></i></span><span>76%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-gh.png" alt="" loading="lazy" onerror="this.style.display='none'">加纳</span><span class="mini"><i style="width:80%"></i></span><span>80%</span></div><div class="trow num"><span><img class="fl" src="flags/h20-pa.png" alt="" loading="lazy" onerror="this.style.display='none'">巴拿马</span><span class="mini"><i style="width:16%"></i></span><span>16%</span></div>
+        </div></div>
+      
+      </div>
+    </div>
+  </div>
+
+  
+  
+
+  <p class="footer-note mt-3">⚠️ 纯数据分析、娱乐参考。</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,1424 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>世界杯 2026 预测系统</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+  <link href="assets/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --pitch:#0b5e3c; --pitch-deep:#06301d; --navy:#0d3b66;
+      --gold:#e9b949; --gold-deep:#c98f1b;
+      --ink:#1c2733; --muted:#6b7a8c; --line:#e6ebf1;
+      --ok:#1f9d61; --bad:#c0564f; --mid:#c3cbd4;
+      --card-shadow:0 1px 2px rgba(16,24,40,.06),0 6px 16px rgba(16,24,40,.05);
+    }
+    body{ background:#f2f4f7; color:var(--ink);
+      font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif; }
+    .num{ font-variant-numeric:tabular-nums; }
+
+    /* ── 头部横幅 ─────────────────────────────────────────── */
+    .hero{ background:linear-gradient(125deg,var(--pitch-deep) 0%,var(--pitch) 52%,var(--navy) 100%);
+      color:#fff; padding:1.1rem 0 .9rem; box-shadow:0 2px 14px rgba(6,48,29,.35); }
+    .hero h1{ font-size:1.25rem; font-weight:800; letter-spacing:.02em; margin:0; }
+    .hero .sub{ color:rgba(255,255,255,.66); font-size:.78rem; margin-top:.15rem; }
+    .hero .nav-pills{ gap:.3rem; }
+    .hero .nav-link{ color:rgba(255,255,255,.78); font-size:.86rem; font-weight:600;
+      padding:.32rem .85rem; border-radius:999px; border:1px solid rgba(255,255,255,.22); }
+    .hero .nav-link:hover{ color:#fff; border-color:rgba(255,255,255,.5); }
+    .hero .nav-link.active{ background:var(--gold); border-color:var(--gold); color:#3a2c05; }
+
+    /* ── 通用卡片 ─────────────────────────────────────────── */
+    .panel{ background:#fff; border:1px solid var(--line); border-radius:14px;
+      box-shadow:var(--card-shadow); }
+    .fl{ height:.95em; width:auto; border-radius:2px; vertical-align:-.08em;
+      box-shadow:0 0 0 1px rgba(16,24,40,.08); }
+    .daily{ background:#fff8e8; border:1px solid #f3e3b3; border-left:4px solid var(--gold);
+      border-radius:10px; padding:.55rem .8rem; font-size:.86rem; }
+    .method summary{ cursor:pointer; font-weight:700; font-size:.9rem; }
+    .method summary::marker{ color:var(--gold-deep); }
+
+    /* ── 三甲领奖台 ───────────────────────────────────────── */
+    .podium{ position:relative; overflow:hidden; text-align:center; padding:.8rem .4rem .7rem; }
+    .podium::before{ content:""; position:absolute; inset:0 0 auto 0; height:4px; }
+    .p1::before{ background:linear-gradient(90deg,#f6d365,#d4a017); }
+    .p2::before{ background:linear-gradient(90deg,#d7dde4,#9aa7b4); }
+    .p3::before{ background:linear-gradient(90deg,#e8b78c,#b0713c); }
+    .podium .medal{ font-size:1.05rem; }
+    .podium .lbl{ font-size:.72rem; color:var(--muted); letter-spacing:.06em; }
+    .podium .tname{ font-size:1.06rem; font-weight:800; margin:.1rem 0; }
+    .podium .tname .fl{ height:1em; margin-right:.3rem; }
+    .podium .pct{ font-size:1.25rem; font-weight:800; }
+    .p1 .pct{ color:var(--gold-deep); } .p2 .pct{ color:#75838f; } .p3 .pct{ color:#a96a39; }
+
+    /* ── 排行榜表 ─────────────────────────────────────────── */
+    .rank-table{ font-size:.875rem; margin-bottom:.6rem; }
+    .rank-table thead th{ font-size:.74rem; color:var(--muted); font-weight:700;
+      text-transform:uppercase; letter-spacing:.04em; border-bottom:2px solid var(--line); }
+    .rank-table td{ border-color:#eef1f5; }
+    .rank-table tbody tr:hover{ background:#f7f9fb; }
+    .rk{ display:inline-flex; width:1.45rem; height:1.45rem; border-radius:50%; font-size:.74rem;
+      font-weight:800; align-items:center; justify-content:center; background:#eef1f5; color:var(--muted); }
+    .rk-1{ background:linear-gradient(135deg,#f6d365,#d4a017); color:#3a2c05; }
+    .rk-2{ background:linear-gradient(135deg,#e2e8ee,#9aa7b4); color:#2c3640; }
+    .rk-3{ background:linear-gradient(135deg,#e8b78c,#b0713c); color:#3d2412; }
+    .pbar{ position:relative; min-width:5.2rem; }
+    .pbar i{ position:absolute; left:0; top:50%; transform:translateY(-50%); height:1.25rem;
+      background:linear-gradient(90deg,rgba(233,185,73,.38),rgba(233,185,73,.10));
+      border-radius:4px; z-index:0; }
+    .pbar b{ position:relative; z-index:1; padding-left:.3rem; }
+
+    /* ── 小组卡 ───────────────────────────────────────────── */
+    .gcard{ padding:.55rem .7rem; height:100%; }
+    .gchip{ display:inline-flex; width:1.35rem; height:1.35rem; border-radius:6px;
+      background:var(--pitch); color:#fff; font-size:.76rem; font-weight:800;
+      align-items:center; justify-content:center; margin-right:.35rem; }
+    .gcard .trow{ display:flex; justify-content:space-between; align-items:center;
+      font-size:.82rem; padding:.12rem 0; }
+    .gcard .trow .fl{ margin-right:.3rem; }
+    .gcard .mini{ flex:1; height:3px; background:#eef1f5; border-radius:2px; margin:0 .5rem; overflow:hidden; }
+    .gcard .mini i{ display:block; height:100%; background:var(--ok); border-radius:2px; }
+
+    /* ── 赛中更新（管理员） ───────────────────────────────── */
+    .admin-card{ border-left:4px solid var(--pitch); padding:.8rem .9rem; }
+    .admin-card textarea{ font-family:ui-monospace,Consolas,monospace; font-size:.84rem; }
+    .btn-pitch{ background:var(--pitch); border-color:var(--pitch); color:#fff; font-weight:600; }
+    .btn-pitch:hover{ background:#0a4f33; border-color:#0a4f33; color:#fff; }
+    .readonly-note{ background:#f3f6f9; border:1px dashed #cfd9e3; border-radius:10px;
+      padding:.6rem .8rem; font-size:.84rem; color:var(--muted); }
+
+    /* ── 逐场预测 ─────────────────────────────────────────── */
+    .wdl{ display:flex; height:6px; border-radius:3px; overflow:hidden; min-width:4.6rem; margin-bottom:2px; }
+    .wdl .w{ background:var(--ok); } .wdl .d{ background:var(--mid); } .wdl .l{ background:var(--bad); }
+    .wdl-txt{ font-size:.74rem; color:var(--muted); }
+    .score-chip{ display:inline-block; font-family:ui-monospace,Consolas,monospace; font-weight:700;
+      font-size:.8rem; background:#eef4f0; border:1px solid #d8e6dd; border-radius:6px; padding:0 .35rem; }
+    .alt-badge{ font-size:.74rem; color:#2a7fa8; background:#e8f4fa; border-radius:6px; padding:.05rem .35rem; }
+    .ts{ display:inline-block; font-family:ui-monospace,Consolas,monospace; font-size:.74rem; font-weight:700;
+      border-radius:6px; padding:0 .3rem; margin-right:.15rem; border:1px solid; white-space:nowrap; }
+    .ts i{ font-style:normal; font-weight:600; opacity:.75; font-size:.68rem; }
+    .ts-h{ color:#187a4b; background:#edf7f1; border-color:#cfe8da; }
+    .ts-d{ color:#5d6b79; background:#f1f4f7; border-color:#dee5ec; }
+    .ts-a{ color:#a14842; background:#faf0ef; border-color:#eed7d4; }
+    .ts-line{ font-size:.72rem; color:var(--muted); }
+    .ko-line{ font-size:.72rem; color:var(--muted); margin-top:1px; }
+    .ko-line b{ color:var(--pitch); font-weight:700; }
+    .act{ font-family:ui-monospace,Consolas,monospace; font-weight:800; font-size:.8rem;
+      border-radius:6px; padding:0 .35rem; }
+    .act-ok{ color:#187a4b; background:#e3f3ea; }
+    .act-miss{ color:#a14842; background:#f7e9e8; }
+    tr.played td{ background:#f6faf7; }
+
+    /* ── 对阵树 ───────────────────────────────────────────── */
+    .champ-hero{ background:linear-gradient(120deg,#3a2c05,#6e5410 45%,#a8821e);
+      color:#fff; border-radius:14px; padding:.9rem 1.1rem; box-shadow:var(--card-shadow); }
+    .champ-hero .big{ font-size:1.3rem; font-weight:800; }
+    .champ-hero .fl{ height:1.05em; }
+    .round-pill{ display:inline-block; font-size:.78rem; font-weight:800; color:var(--pitch);
+      background:#e7f2ec; border-radius:999px; padding:.15rem .7rem; margin-bottom:.45rem; }
+    .bracket-match{ background:#fff; border:1px solid var(--line); border-radius:10px;
+      padding:.45rem .6rem; margin-bottom:.45rem; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+    .bracket-match .side{ display:flex; justify-content:space-between; align-items:center;
+      padding:.1rem .3rem; border-radius:6px; font-size:.84rem; }
+    .bracket-match .side .fl{ margin-right:.32rem; }
+    .side.win{ font-weight:700; background:rgba(31,157,97,.08); }
+    .side.win .tick{ color:var(--ok); font-weight:800; }
+    .side.lose{ color:#9aa7b4; }
+    .reach{ color:#9aa7b4; font-size:.72rem; }
+    .adv-chip{ display:inline-block; font-size:.76rem; background:#f4f7f5; border:1px solid #dde7e1;
+      border-radius:999px; padding:.05rem .5rem; }
+    .footer-note{ color:var(--muted); font-size:.78rem; }
+  </style>
+</head>
+<body>
+
+<header class="hero mb-3">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h1>⚽ 世界杯 2026 · 预测系统</h1>
+        <div class="sub">Dixon-Coles 多信号分析 ⊕ 博彩市场 · 蒙特卡洛 20,000 次全赛事模拟</div>
+      </div>
+      <ul class="nav nav-pills">
+        <li class="nav-item"><a class="nav-link " href="index.html">夺冠总览</a></li>
+        <li class="nav-item"><a class="nav-link active" href="fixtures.html">逐场预测</a></li>
+        <li class="nav-item"><a class="nav-link " href="bracket.html">对阵树</a></li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<div class="container pb-4">
+  <div class="daily mb-3" style="background:#eef4f0;border-color:#cfe0d6;border-left-color:var(--pitch)"><b>🔒 只读分享快照</b> · 数据更新于 2026-06-22 · 已条件化 39 场 · 纯数据分析、娱乐参考（实时改动在管理员本机）</div>
+
+  
+  <div class="daily mb-3"><b>📅 今日提醒 · 小组赛进行中：</b>每天把已踢比分填进『赛中更新』；每 2-3 天 fetch_odds.py 刷盘口。6/27 收官后淘汰赛盘口会挂出，记得再刷一次。</div>
+  
+
+  
+  
+  <h5 class="fw-bold">📋 赛程逐场预测（72 场小组赛）</h5>
+  <div class="alert alert-info py-2 small mb-2">
+    <b>怎么看：</b><b>胜平负 %</b> 是真正经回测验证的预测（1,575 场历史回测 RPS 0.1913，单场与博彩持平）——这才是该信的部分。
+    <b>「比分」是参考，不精确</b>：足球进球少，单个精确比分本身概率就只有 ~10–16%，所以多数会落在 1-0/2-0/1-1
+    （这是进球的统计规律，不是模型偷懒）。<b>比分 Top3</b> 列给出每场<b>最可能的 3 个比分及各自概率</b>
+    （<span class="ts ts-h">绿=主胜</span><span class="ts ts-d">灰=平</span><span class="ts ts-a">红=客胜</span>，
+    如实反映分布，可能与"预测"列胜者不同向），<b>xG</b> 是期望进球（更能看出强弱）。
+  </div>
+  
+  <div class="panel p-2 px-3 mb-2 small num">
+    📊 <b>赛果对账</b>（已赛 39 场 · 按赛前预测口径，喂入实际比分不改赛前预测）：
+    胜平负命中 <b>22/39</b> ·
+    实际比分进 Top3 <b>13/39</b>（🎯标记） ·
+    头牌比分全中 <b>5/39</b> ·
+    滚动 RPS <b>0.155</b>
+    <span class="text-muted">（越低越好；博彩长期基准≈0.199，1,575 场回测 0.1913——小样本波动大，看趋势别看单场）</span>
+  </div>
+  
+  <div class="panel p-2 px-3 table-responsive">
+  <table class="table table-sm table-hover align-middle rank-table num mb-1">
+    <thead><tr>
+      <th class="d-none d-md-table-cell">组</th>
+      <th>对阵 · 开球(北京)</th><th>胜/平/负%</th><th>预测</th><th>比分 Top3</th><th>实际</th>
+      <th class="d-none d-md-table-cell">xG</th>
+      <th class="d-none d-md-table-cell text-muted">市场</th>
+      <th class="d-none d-md-table-cell">场地</th></tr></thead>
+    <tbody>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">A</span></td>
+        <td class="small"><img class="fl" src="flags/h20-mx.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>墨西哥</b>
+          <span class="text-muted">vs</span>
+          <b>南非</b> <img class="fl" src="flags/h20-za.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/12 周五 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:61"></i><i class="d" style="flex:22"></i><i class="l" style="flex:17"></i></div>
+          <div class="wdl-txt">61 / 22 / 17</div></td>
+        <td class="small"><b>墨西哥</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-h">2-0 <i>11%</i></span><span class="ts ts-d">1-1 <i>9%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">2-0</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.7-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"><span class="alt-badge" title="高原球场 Mexico City 2240m">🏔2240m</span></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">A</span></td>
+        <td class="small"><img class="fl" src="flags/h20-kr.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>韩国</b>
+          <span class="text-muted">vs</span>
+          <b>捷克</b> <img class="fl" src="flags/h20-cz.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/12 周五 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:36"></i><i class="d" style="flex:23"></i><i class="l" style="flex:41"></i></div>
+          <div class="wdl-txt">36 / 23 / 41</div></td>
+        <td class="small"><b>捷克</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-a">0-1 <i>7%</i></span><span class="ts ts-d">0-0 <i>7%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">2-1</span></td>
+        <td class="small d-none d-md-table-cell">1.2-1.3</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"><span class="alt-badge" title="高原球场 Zapopan 1560m">🏔1560m</span></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">B</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ca.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>加拿大</b>
+          <span class="text-muted">vs</span>
+          <b>波黑</b> <img class="fl" src="flags/h20-ba.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/13 周六 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:49"></i><i class="d" style="flex:26"></i><i class="l" style="flex:25"></i></div>
+          <div class="wdl-txt">49 / 26 / 25</div></td>
+        <td class="small"><b>加拿大</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>11%</i></span><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-d">0-0 <i>10%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-1</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.3-0.8</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">D</span></td>
+        <td class="small"><img class="fl" src="flags/h20-us.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>美国</b>
+          <span class="text-muted">vs</span>
+          <b>巴拉圭</b> <img class="fl" src="flags/h20-py.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/13 周六 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:51"></i><i class="d" style="flex:23"></i><i class="l" style="flex:26"></i></div>
+          <div class="wdl-txt">51 / 23 / 26</div></td>
+        <td class="small"><b>美国</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-h">2-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">4-1</span></td>
+        <td class="small d-none d-md-table-cell">1.6-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">B</span></td>
+        <td class="small"><img class="fl" src="flags/h20-qa.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>卡塔尔</b>
+          <span class="text-muted">vs</span>
+          <b>瑞士</b> <img class="fl" src="flags/h20-ch.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/14 周日 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:12"></i><i class="d" style="flex:15"></i><i class="l" style="flex:73"></i></div>
+          <div class="wdl-txt">12 / 15 / 73</div></td>
+        <td class="small"><b>瑞士</b>
+          <span class="score-chip">0-2</span></td>
+        <td><span class="ts ts-a">0-2 <i>8%</i></span><span class="ts ts-a">0-3 <i>7%</i></span><span class="ts ts-a">1-2 <i>7%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-1</span></td>
+        <td class="small d-none d-md-table-cell">0.8-2.7</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">C</span></td>
+        <td class="small"><img class="fl" src="flags/h20-br.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>巴西</b>
+          <span class="text-muted">vs</span>
+          <b>摩洛哥</b> <img class="fl" src="flags/h20-ma.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/14 周日 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:41"></i><i class="d" style="flex:28"></i><i class="l" style="flex:32"></i></div>
+          <div class="wdl-txt">41 / 28 / 32</div></td>
+        <td class="small"><b>巴西</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">0-0 <i>12%</i></span><span class="ts ts-h">1-0 <i>11%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-1</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.1-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">C</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ht.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>海地</b>
+          <span class="text-muted">vs</span>
+          <b>苏格兰</b> <img class="fl" src="flags/h20-gb-sct.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/14 周日 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:24"></i><i class="d" style="flex:22"></i><i class="l" style="flex:54"></i></div>
+          <div class="wdl-txt">24 / 22 / 54</div></td>
+        <td class="small"><b>苏格兰</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-a">0-1 <i>8%</i></span><span class="ts ts-a">0-2 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">0-1</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.0-1.8</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">D</span></td>
+        <td class="small"><img class="fl" src="flags/h20-au.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>澳大利亚</b>
+          <span class="text-muted">vs</span>
+          <b>土耳其</b> <img class="fl" src="flags/h20-tr.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/14 周日 12:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:31"></i><i class="d" style="flex:24"></i><i class="l" style="flex:45"></i></div>
+          <div class="wdl-txt">31 / 24 / 45</div></td>
+        <td class="small"><b>土耳其</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-a">0-1 <i>9%</i></span><span class="ts ts-d">0-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">2-0</span></td>
+        <td class="small d-none d-md-table-cell">1.0-1.4</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">E</span></td>
+        <td class="small"><img class="fl" src="flags/h20-de.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>德国</b>
+          <span class="text-muted">vs</span>
+          <b>库拉索</b> <img class="fl" src="flags/h20-cw.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/15 周一 01:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:85"></i><i class="d" style="flex:10"></i><i class="l" style="flex:6"></i></div>
+          <div class="wdl-txt">85 / 10 / 6</div></td>
+        <td class="small"><b>德国</b>
+          <span class="score-chip">3-0</span></td>
+        <td><span class="ts ts-h">3-0 <i>8%</i></span><span class="ts ts-h">4-0 <i>8%</i></span><span class="ts ts-h">2-0 <i>7%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">7-1</span></td>
+        <td class="small d-none d-md-table-cell">3.5-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">F</span></td>
+        <td class="small"><img class="fl" src="flags/h20-nl.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>荷兰</b>
+          <span class="text-muted">vs</span>
+          <b>日本</b> <img class="fl" src="flags/h20-jp.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/15 周一 04:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:44"></i><i class="d" style="flex:25"></i><i class="l" style="flex:31"></i></div>
+          <div class="wdl-txt">44 / 25 / 31</div></td>
+        <td class="small"><b>荷兰</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">1-0 <i>10%</i></span><span class="ts ts-d">0-0 <i>9%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">2-2</span></td>
+        <td class="small d-none d-md-table-cell">1.3-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">E</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ci.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>科特迪瓦</b>
+          <span class="text-muted">vs</span>
+          <b>厄瓜多尔</b> <img class="fl" src="flags/h20-ec.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/15 周一 07:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:32"></i><i class="d" style="flex:35"></i><i class="l" style="flex:34"></i></div>
+          <div class="wdl-txt">32 / 35 / 34</div></td>
+        <td class="small">平
+          <span class="score-chip">0-0</span></td>
+        <td><span class="ts ts-d">0-0 <i>21%</i></span><span class="ts ts-a">0-1 <i>15%</i></span><span class="ts ts-h">1-0 <i>14%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-0</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">0.6-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">F</span></td>
+        <td class="small"><img class="fl" src="flags/h20-se.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>瑞典</b>
+          <span class="text-muted">vs</span>
+          <b>突尼斯</b> <img class="fl" src="flags/h20-tn.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/15 周一 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:47"></i><i class="d" style="flex:24"></i><i class="l" style="flex:29"></i></div>
+          <div class="wdl-txt">47 / 24 / 29</div></td>
+        <td class="small"><b>瑞典</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-d">0-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">5-1</span></td>
+        <td class="small d-none d-md-table-cell">1.4-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">H</span></td>
+        <td class="small"><img class="fl" src="flags/h20-es.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>西班牙</b>
+          <span class="text-muted">vs</span>
+          <b>佛得角</b> <img class="fl" src="flags/h20-cv.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/16 周二 00:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:76"></i><i class="d" style="flex:15"></i><i class="l" style="flex:10"></i></div>
+          <div class="wdl-txt">76 / 15 / 10</div></td>
+        <td class="small"><b>西班牙</b>
+          <span class="score-chip">2-0</span></td>
+        <td><span class="ts ts-h">2-0 <i>10%</i></span><span class="ts ts-h">3-0 <i>9%</i></span><span class="ts ts-h">1-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">0-0</span></td>
+        <td class="small d-none d-md-table-cell">2.6-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">G</span></td>
+        <td class="small"><img class="fl" src="flags/h20-be.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>比利时</b>
+          <span class="text-muted">vs</span>
+          <b>埃及</b> <img class="fl" src="flags/h20-eg.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/16 周二 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:43"></i><i class="d" style="flex:27"></i><i class="l" style="flex:30"></i></div>
+          <div class="wdl-txt">43 / 27 / 30</div></td>
+        <td class="small"><b>比利时</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>11%</i></span><span class="ts ts-d">0-0 <i>11%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-1</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.2-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">H</span></td>
+        <td class="small"><img class="fl" src="flags/h20-sa.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>沙特阿拉伯</b>
+          <span class="text-muted">vs</span>
+          <b>乌拉圭</b> <img class="fl" src="flags/h20-uy.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/16 周二 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:20"></i><i class="d" style="flex:27"></i><i class="l" style="flex:53"></i></div>
+          <div class="wdl-txt">20 / 27 / 53</div></td>
+        <td class="small"><b>乌拉圭</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>15%</i></span><span class="ts ts-d">0-0 <i>14%</i></span><span class="ts ts-a">0-2 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-1</span></td>
+        <td class="small d-none d-md-table-cell">0.5-1.2</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">G</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ir.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>伊朗</b>
+          <span class="text-muted">vs</span>
+          <b>新西兰</b> <img class="fl" src="flags/h20-nz.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/16 周二 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:45"></i><i class="d" style="flex:27"></i><i class="l" style="flex:28"></i></div>
+          <div class="wdl-txt">45 / 27 / 28</div></td>
+        <td class="small"><b>伊朗</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-d">0-0 <i>12%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">2-2</span></td>
+        <td class="small d-none d-md-table-cell">1.1-0.8</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">I</span></td>
+        <td class="small"><img class="fl" src="flags/h20-fr.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>法国</b>
+          <span class="text-muted">vs</span>
+          <b>塞内加尔</b> <img class="fl" src="flags/h20-sn.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/17 周三 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:61"></i><i class="d" style="flex:20"></i><i class="l" style="flex:18"></i></div>
+          <div class="wdl-txt">61 / 20 / 18</div></td>
+        <td class="small"><b>法国</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-h">2-0 <i>9%</i></span><span class="ts ts-d">1-1 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">3-1</span></td>
+        <td class="small d-none d-md-table-cell">1.9-0.7</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">I</span></td>
+        <td class="small"><img class="fl" src="flags/h20-iq.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>伊拉克</b>
+          <span class="text-muted">vs</span>
+          <b>挪威</b> <img class="fl" src="flags/h20-no.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/17 周三 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:15"></i><i class="d" style="flex:20"></i><i class="l" style="flex:65"></i></div>
+          <div class="wdl-txt">15 / 20 / 65</div></td>
+        <td class="small"><b>挪威</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>11%</i></span><span class="ts ts-a">0-2 <i>11%</i></span><span class="ts ts-d">1-1 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">1-4</span></td>
+        <td class="small d-none d-md-table-cell">0.6-1.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">J</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ar.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>阿根廷</b>
+          <span class="text-muted">vs</span>
+          <b>阿尔及利亚</b> <img class="fl" src="flags/h20-dz.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/17 周三 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:60"></i><i class="d" style="flex:23"></i><i class="l" style="flex:17"></i></div>
+          <div class="wdl-txt">60 / 23 / 17</div></td>
+        <td class="small"><b>阿根廷</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>13%</i></span><span class="ts ts-h">2-0 <i>11%</i></span><span class="ts ts-d">0-0 <i>10%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">3-0</span></td>
+        <td class="small d-none d-md-table-cell">1.6-0.5</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">J</span></td>
+        <td class="small"><img class="fl" src="flags/h20-at.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>奥地利</b>
+          <span class="text-muted">vs</span>
+          <b>约旦</b> <img class="fl" src="flags/h20-jo.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/17 周三 12:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:59"></i><i class="d" style="flex:21"></i><i class="l" style="flex:21"></i></div>
+          <div class="wdl-txt">59 / 21 / 21</div></td>
+        <td class="small"><b>奥地利</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-h">2-0 <i>8%</i></span><span class="ts ts-d">1-1 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">3-1</span></td>
+        <td class="small d-none d-md-table-cell">1.9-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">K</span></td>
+        <td class="small"><img class="fl" src="flags/h20-pt.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>葡萄牙</b>
+          <span class="text-muted">vs</span>
+          <b>刚果(金)</b> <img class="fl" src="flags/h20-cd.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/18 周四 01:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:53"></i><i class="d" style="flex:27"></i><i class="l" style="flex:21"></i></div>
+          <div class="wdl-txt">53 / 27 / 21</div></td>
+        <td class="small"><b>葡萄牙</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>14%</i></span><span class="ts ts-d">0-0 <i>13%</i></span><span class="ts ts-h">2-0 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-1</span></td>
+        <td class="small d-none d-md-table-cell">1.3-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">L</span></td>
+        <td class="small"><img class="fl" src="flags/h20-gb-eng.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>英格兰</b>
+          <span class="text-muted">vs</span>
+          <b>克罗地亚</b> <img class="fl" src="flags/h20-hr.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/18 周四 04:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:55"></i><i class="d" style="flex:24"></i><i class="l" style="flex:21"></i></div>
+          <div class="wdl-txt">55 / 24 / 21</div></td>
+        <td class="small"><b>英格兰</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>11%</i></span><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">2-0 <i>10%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">4-2</span></td>
+        <td class="small d-none d-md-table-cell">1.5-0.7</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">L</span></td>
+        <td class="small"><img class="fl" src="flags/h20-gh.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>加纳</b>
+          <span class="text-muted">vs</span>
+          <b>巴拿马</b> <img class="fl" src="flags/h20-pa.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/18 周四 07:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:45"></i><i class="d" style="flex:24"></i><i class="l" style="flex:31"></i></div>
+          <div class="wdl-txt">45 / 24 / 31</div></td>
+        <td class="small"><b>加纳</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-d">0-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">1-0</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.4-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">K</span></td>
+        <td class="small"><img class="fl" src="flags/h20-uz.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>乌兹别克斯坦</b>
+          <span class="text-muted">vs</span>
+          <b>哥伦比亚</b> <img class="fl" src="flags/h20-co.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/18 周四 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:22"></i><i class="d" style="flex:23"></i><i class="l" style="flex:55"></i></div>
+          <div class="wdl-txt">22 / 23 / 55</div></td>
+        <td class="small"><b>哥伦比亚</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>11%</i></span><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-a">0-2 <i>9%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">1-3</span></td>
+        <td class="small d-none d-md-table-cell">0.7-1.5</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"><span class="alt-badge" title="高原球场 Mexico City 2240m">🏔2240m</span></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">A</span></td>
+        <td class="small"><img class="fl" src="flags/h20-cz.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>捷克</b>
+          <span class="text-muted">vs</span>
+          <b>南非</b> <img class="fl" src="flags/h20-za.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/19 周五 00:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:50"></i><i class="d" style="flex:24"></i><i class="l" style="flex:26"></i></div>
+          <div class="wdl-txt">50 / 24 / 26</div></td>
+        <td class="small"><b>捷克</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">1-0 <i>10%</i></span><span class="ts ts-h">2-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">1-1</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.5-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">B</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ch.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>瑞士</b>
+          <span class="text-muted">vs</span>
+          <b>波黑</b> <img class="fl" src="flags/h20-ba.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/19 周五 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:52"></i><i class="d" style="flex:23"></i><i class="l" style="flex:25"></i></div>
+          <div class="wdl-txt">52 / 23 / 25</div></td>
+        <td class="small"><b>瑞士</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-h">2-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">4-1</span></td>
+        <td class="small d-none d-md-table-cell">1.6-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">B</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ca.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>加拿大</b>
+          <span class="text-muted">vs</span>
+          <b>卡塔尔</b> <img class="fl" src="flags/h20-qa.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/19 周五 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:69"></i><i class="d" style="flex:17"></i><i class="l" style="flex:13"></i></div>
+          <div class="wdl-txt">69 / 17 / 13</div></td>
+        <td class="small"><b>加拿大</b>
+          <span class="score-chip">2-0</span></td>
+        <td><span class="ts ts-h">2-0 <i>10%</i></span><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-h">3-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">6-0</span></td>
+        <td class="small d-none d-md-table-cell">2.3-0.7</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">A</span></td>
+        <td class="small"><img class="fl" src="flags/h20-mx.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>墨西哥</b>
+          <span class="text-muted">vs</span>
+          <b>韩国</b> <img class="fl" src="flags/h20-kr.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/19 周五 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:51"></i><i class="d" style="flex:24"></i><i class="l" style="flex:25"></i></div>
+          <div class="wdl-txt">51 / 24 / 25</div></td>
+        <td class="small"><b>墨西哥</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>10%</i></span><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">2-0 <i>9%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">1-0</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.5-0.8</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"><span class="alt-badge" title="高原球场 Zapopan 1560m">🏔1560m</span></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">D</span></td>
+        <td class="small"><img class="fl" src="flags/h20-us.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>美国</b>
+          <span class="text-muted">vs</span>
+          <b>澳大利亚</b> <img class="fl" src="flags/h20-au.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/20 周六 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:56"></i><i class="d" style="flex:21"></i><i class="l" style="flex:23"></i></div>
+          <div class="wdl-txt">56 / 21 / 23</div></td>
+        <td class="small"><b>美国</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>8%</i></span><span class="ts ts-h">1-0 <i>8%</i></span><span class="ts ts-h">2-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">2-0</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.8-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">C</span></td>
+        <td class="small"><img class="fl" src="flags/h20-gb-sct.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>苏格兰</b>
+          <span class="text-muted">vs</span>
+          <b>摩洛哥</b> <img class="fl" src="flags/h20-ma.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/20 周六 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:23"></i><i class="d" style="flex:28"></i><i class="l" style="flex:49"></i></div>
+          <div class="wdl-txt">23 / 28 / 49</div></td>
+        <td class="small"><b>摩洛哥</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>14%</i></span><span class="ts ts-d">0-0 <i>14%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">0-1</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">0.6-1.1</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">C</span></td>
+        <td class="small"><img class="fl" src="flags/h20-br.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>巴西</b>
+          <span class="text-muted">vs</span>
+          <b>海地</b> <img class="fl" src="flags/h20-ht.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/20 周六 08:30</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:79"></i><i class="d" style="flex:12"></i><i class="l" style="flex:9"></i></div>
+          <div class="wdl-txt">79 / 12 / 9</div></td>
+        <td class="small"><b>巴西</b>
+          <span class="score-chip">3-0</span></td>
+        <td><span class="ts ts-h">3-0 <i>8%</i></span><span class="ts ts-h">2-0 <i>8%</i></span><span class="ts ts-h">4-0 <i>7%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">3-0</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">3.1-0.7</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">D</span></td>
+        <td class="small"><img class="fl" src="flags/h20-tr.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>土耳其</b>
+          <span class="text-muted">vs</span>
+          <b>巴拉圭</b> <img class="fl" src="flags/h20-py.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/20 周六 11:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:41"></i><i class="d" style="flex:26"></i><i class="l" style="flex:33"></i></div>
+          <div class="wdl-txt">41 / 26 / 33</div></td>
+        <td class="small"><b>土耳其</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">1-0 <i>9%</i></span><span class="ts ts-d">0-0 <i>9%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">0-1</span></td>
+        <td class="small d-none d-md-table-cell">1.2-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">F</span></td>
+        <td class="small"><img class="fl" src="flags/h20-nl.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>荷兰</b>
+          <span class="text-muted">vs</span>
+          <b>瑞典</b> <img class="fl" src="flags/h20-se.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/21 周日 01:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:56"></i><i class="d" style="flex:19"></i><i class="l" style="flex:26"></i></div>
+          <div class="wdl-txt">56 / 19 / 26</div></td>
+        <td class="small"><b>荷兰</b>
+          <span class="score-chip">2-1</span></td>
+        <td><span class="ts ts-h">2-1 <i>7%</i></span><span class="ts ts-d">1-1 <i>7%</i></span><span class="ts ts-h">2-0 <i>6%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">5-1</span></td>
+        <td class="small d-none d-md-table-cell">2.2-1.3</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">E</span></td>
+        <td class="small"><img class="fl" src="flags/h20-de.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>德国</b>
+          <span class="text-muted">vs</span>
+          <b>科特迪瓦</b> <img class="fl" src="flags/h20-ci.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/21 周日 04:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:49"></i><i class="d" style="flex:24"></i><i class="l" style="flex:27"></i></div>
+          <div class="wdl-txt">49 / 24 / 27</div></td>
+        <td class="small"><b>德国</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">1-0 <i>10%</i></span><span class="ts ts-d">0-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">2-1</span></td>
+        <td class="small d-none d-md-table-cell">1.4-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">E</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ec.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>厄瓜多尔</b>
+          <span class="text-muted">vs</span>
+          <b>库拉索</b> <img class="fl" src="flags/h20-cw.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/21 周日 08:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:64"></i><i class="d" style="flex:23"></i><i class="l" style="flex:13"></i></div>
+          <div class="wdl-txt">64 / 23 / 13</div></td>
+        <td class="small"><b>厄瓜多尔</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>15%</i></span><span class="ts ts-h">2-0 <i>13%</i></span><span class="ts ts-d">0-0 <i>12%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">0-0</span> <span title="实际比分命中比分Top3">🎯</span></td>
+        <td class="small d-none d-md-table-cell">1.6-0.4</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">F</span></td>
+        <td class="small"><img class="fl" src="flags/h20-tn.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>突尼斯</b>
+          <span class="text-muted">vs</span>
+          <b>日本</b> <img class="fl" src="flags/h20-jp.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/21 周日 12:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:24"></i><i class="d" style="flex:29"></i><i class="l" style="flex:47"></i></div>
+          <div class="wdl-txt">24 / 29 / 47</div></td>
+        <td class="small"><b>日本</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">0-0 <i>15%</i></span><span class="ts ts-a">0-1 <i>15%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">0-4</span></td>
+        <td class="small d-none d-md-table-cell">0.6-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">H</span></td>
+        <td class="small"><img class="fl" src="flags/h20-es.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>西班牙</b>
+          <span class="text-muted">vs</span>
+          <b>沙特阿拉伯</b> <img class="fl" src="flags/h20-sa.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/22 周一 00:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:81"></i><i class="d" style="flex:13"></i><i class="l" style="flex:7"></i></div>
+          <div class="wdl-txt">81 / 13 / 7</div></td>
+        <td class="small"><b>西班牙</b>
+          <span class="score-chip">2-0</span></td>
+        <td><span class="ts ts-h">2-0 <i>11%</i></span><span class="ts ts-h">3-0 <i>10%</i></span><span class="ts ts-h">1-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-ok" title="胜平负叫对">4-0</span></td>
+        <td class="small d-none d-md-table-cell">2.8-0.4</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">G</span></td>
+        <td class="small"><img class="fl" src="flags/h20-be.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>比利时</b>
+          <span class="text-muted">vs</span>
+          <b>伊朗</b> <img class="fl" src="flags/h20-ir.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/22 周一 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:54"></i><i class="d" style="flex:22"></i><i class="l" style="flex:25"></i></div>
+          <div class="wdl-txt">54 / 22 / 25</div></td>
+        <td class="small"><b>比利时</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-h">1-0 <i>8%</i></span><span class="ts ts-h">2-0 <i>8%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">0-0</span></td>
+        <td class="small d-none d-md-table-cell">1.7-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr class="played">
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">H</span></td>
+        <td class="small"><img class="fl" src="flags/h20-uy.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>乌拉圭</b>
+          <span class="text-muted">vs</span>
+          <b>佛得角</b> <img class="fl" src="flags/h20-cv.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/22 周一 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:47"></i><i class="d" style="flex:28"></i><i class="l" style="flex:25"></i></div>
+          <div class="wdl-txt">47 / 28 / 25</div></td>
+        <td class="small"><b>乌拉圭</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>13%</i></span><span class="ts ts-d">0-0 <i>13%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"><span class="act act-miss" title="胜平负叫错">2-2</span></td>
+        <td class="small d-none d-md-table-cell">1.1-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">—</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">G</span></td>
+        <td class="small"><img class="fl" src="flags/h20-nz.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>新西兰</b>
+          <span class="text-muted">vs</span>
+          <b>埃及</b> <img class="fl" src="flags/h20-eg.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/22 周一 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:36"></i><i class="d" style="flex:30"></i><i class="l" style="flex:34"></i></div>
+          <div class="wdl-txt">36 / 30 / 34</div></td>
+        <td class="small"><b>新西兰</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">0-0 <i>17%</i></span><span class="ts ts-a">0-1 <i>16%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.5-1.0</td>
+        <td class="small text-muted d-none d-md-table-cell">49/30/22</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">J</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ar.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>阿根廷</b>
+          <span class="text-muted">vs</span>
+          <b>奥地利</b> <img class="fl" src="flags/h20-at.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/23 周二 01:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:59"></i><i class="d" style="flex:25"></i><i class="l" style="flex:16"></i></div>
+          <div class="wdl-txt">59 / 25 / 16</div></td>
+        <td class="small"><b>阿根廷</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>15%</i></span><span class="ts ts-d">0-0 <i>13%</i></span><span class="ts ts-h">2-0 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.3-0.5</td>
+        <td class="small text-muted d-none d-md-table-cell">63/24/14</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">I</span></td>
+        <td class="small"><img class="fl" src="flags/h20-fr.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>法国</b>
+          <span class="text-muted">vs</span>
+          <b>伊拉克</b> <img class="fl" src="flags/h20-iq.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/23 周二 05:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:83"></i><i class="d" style="flex:12"></i><i class="l" style="flex:5"></i></div>
+          <div class="wdl-txt">83 / 12 / 5</div></td>
+        <td class="small"><b>法国</b>
+          <span class="score-chip">2-0</span></td>
+        <td><span class="ts ts-h">2-0 <i>13%</i></span><span class="ts ts-h">1-0 <i>11%</i></span><span class="ts ts-h">3-0 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">2.4-0.4</td>
+        <td class="small text-muted d-none d-md-table-cell">89/8/3</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">I</span></td>
+        <td class="small"><img class="fl" src="flags/h20-no.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>挪威</b>
+          <span class="text-muted">vs</span>
+          <b>塞内加尔</b> <img class="fl" src="flags/h20-sn.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/23 周二 08:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:44"></i><i class="d" style="flex:25"></i><i class="l" style="flex:31"></i></div>
+          <div class="wdl-txt">44 / 25 / 31</div></td>
+        <td class="small"><b>挪威</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-h">1-0 <i>8%</i></span><span class="ts ts-h">2-1 <i>7%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.5-1.1</td>
+        <td class="small text-muted d-none d-md-table-cell">43/27/30</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">J</span></td>
+        <td class="small"><img class="fl" src="flags/h20-jo.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>约旦</b>
+          <span class="text-muted">vs</span>
+          <b>阿尔及利亚</b> <img class="fl" src="flags/h20-dz.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/23 周二 11:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:19"></i><i class="d" style="flex:21"></i><i class="l" style="flex:60"></i></div>
+          <div class="wdl-txt">19 / 21 / 60</div></td>
+        <td class="small"><b>阿尔及利亚</b>
+          <span class="score-chip">1-2</span></td>
+        <td><span class="ts ts-d">1-1 <i>8%</i></span><span class="ts ts-a">1-2 <i>7%</i></span><span class="ts ts-a">0-2 <i>7%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.0-2.0</td>
+        <td class="small text-muted d-none d-md-table-cell">16/22/62</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">K</span></td>
+        <td class="small"><img class="fl" src="flags/h20-pt.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>葡萄牙</b>
+          <span class="text-muted">vs</span>
+          <b>乌兹别克斯坦</b> <img class="fl" src="flags/h20-uz.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/24 周三 01:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:72"></i><i class="d" style="flex:18"></i><i class="l" style="flex:11"></i></div>
+          <div class="wdl-txt">72 / 18 / 11</div></td>
+        <td class="small"><b>葡萄牙</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-h">2-0 <i>11%</i></span><span class="ts ts-d">0-0 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.7-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">81/13/6</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">L</span></td>
+        <td class="small"><img class="fl" src="flags/h20-gb-eng.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>英格兰</b>
+          <span class="text-muted">vs</span>
+          <b>加纳</b> <img class="fl" src="flags/h20-gh.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/24 周三 04:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:73"></i><i class="d" style="flex:17"></i><i class="l" style="flex:10"></i></div>
+          <div class="wdl-txt">73 / 17 / 10</div></td>
+        <td class="small"><b>英格兰</b>
+          <span class="score-chip">2-0</span></td>
+        <td><span class="ts ts-h">2-0 <i>12%</i></span><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-h">3-0 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">2.0-0.5</td>
+        <td class="small text-muted d-none d-md-table-cell">78/15/7</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">L</span></td>
+        <td class="small"><img class="fl" src="flags/h20-pa.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>巴拿马</b>
+          <span class="text-muted">vs</span>
+          <b>克罗地亚</b> <img class="fl" src="flags/h20-hr.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/24 周三 07:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:16"></i><i class="d" style="flex:22"></i><i class="l" style="flex:62"></i></div>
+          <div class="wdl-txt">16 / 22 / 62</div></td>
+        <td class="small"><b>克罗地亚</b>
+          <span class="score-chip">0-2</span></td>
+        <td><span class="ts ts-a">0-2 <i>9%</i></span><span class="ts ts-a">0-1 <i>9%</i></span><span class="ts ts-d">1-1 <i>8%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.8-2.0</td>
+        <td class="small text-muted d-none d-md-table-cell">14/24/62</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">K</span></td>
+        <td class="small"><img class="fl" src="flags/h20-co.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>哥伦比亚</b>
+          <span class="text-muted">vs</span>
+          <b>刚果(金)</b> <img class="fl" src="flags/h20-cd.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/24 周三 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:54"></i><i class="d" style="flex:25"></i><i class="l" style="flex:21"></i></div>
+          <div class="wdl-txt">54 / 25 / 21</div></td>
+        <td class="small"><b>哥伦比亚</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">0-0 <i>12%</i></span><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.1-0.8</td>
+        <td class="small text-muted d-none d-md-table-cell">63/23/14</td>
+        <td class="small d-none d-md-table-cell"><span class="alt-badge" title="高原球场 Zapopan 1560m">🏔1560m</span></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">B</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ca.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>加拿大</b>
+          <span class="text-muted">vs</span>
+          <b>瑞士</b> <img class="fl" src="flags/h20-ch.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/25 周四 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:33"></i><i class="d" style="flex:28"></i><i class="l" style="flex:38"></i></div>
+          <div class="wdl-txt">33 / 28 / 38</div></td>
+        <td class="small"><b>瑞士</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-d">0-0 <i>8%</i></span><span class="ts ts-a">0-1 <i>8%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.2-1.2</td>
+        <td class="small text-muted d-none d-md-table-cell">29/32/39</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">B</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ba.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>波黑</b>
+          <span class="text-muted">vs</span>
+          <b>卡塔尔</b> <img class="fl" src="flags/h20-qa.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/25 周四 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:61"></i><i class="d" style="flex:20"></i><i class="l" style="flex:18"></i></div>
+          <div class="wdl-txt">61 / 20 / 18</div></td>
+        <td class="small"><b>波黑</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-h">1-0 <i>8%</i></span><span class="ts ts-h">2-0 <i>8%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.8-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">67/19/14</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">C</span></td>
+        <td class="small"><img class="fl" src="flags/h20-gb-sct.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>苏格兰</b>
+          <span class="text-muted">vs</span>
+          <b>巴西</b> <img class="fl" src="flags/h20-br.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/25 周四 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:16"></i><i class="d" style="flex:18"></i><i class="l" style="flex:65"></i></div>
+          <div class="wdl-txt">16 / 18 / 65</div></td>
+        <td class="small"><b>巴西</b>
+          <span class="score-chip">0-2</span></td>
+        <td><span class="ts ts-a">0-2 <i>8%</i></span><span class="ts ts-a">1-2 <i>7%</i></span><span class="ts ts-d">1-1 <i>7%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.9-2.2</td>
+        <td class="small text-muted d-none d-md-table-cell">14/18/68</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">C</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ma.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>摩洛哥</b>
+          <span class="text-muted">vs</span>
+          <b>海地</b> <img class="fl" src="flags/h20-ht.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/25 周四 06:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:72"></i><i class="d" style="flex:18"></i><i class="l" style="flex:10"></i></div>
+          <div class="wdl-txt">72 / 18 / 10</div></td>
+        <td class="small"><b>摩洛哥</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>14%</i></span><span class="ts ts-h">2-0 <i>12%</i></span><span class="ts ts-d">0-0 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.6-0.5</td>
+        <td class="small text-muted d-none d-md-table-cell">81/13/6</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">A</span></td>
+        <td class="small"><img class="fl" src="flags/h20-mx.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>墨西哥</b>
+          <span class="text-muted">vs</span>
+          <b>捷克</b> <img class="fl" src="flags/h20-cz.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/25 周四 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:50"></i><i class="d" style="flex:24"></i><i class="l" style="flex:26"></i></div>
+          <div class="wdl-txt">50 / 24 / 26</div></td>
+        <td class="small"><b>墨西哥</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>10%</i></span><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">2-0 <i>8%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.5-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">49/24/26</td>
+        <td class="small d-none d-md-table-cell"><span class="alt-badge" title="高原球场 Mexico City 2240m">🏔2240m</span></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">A</span></td>
+        <td class="small"><img class="fl" src="flags/h20-za.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>南非</b>
+          <span class="text-muted">vs</span>
+          <b>韩国</b> <img class="fl" src="flags/h20-kr.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/25 周四 09:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:23"></i><i class="d" style="flex:24"></i><i class="l" style="flex:53"></i></div>
+          <div class="wdl-txt">23 / 24 / 53</div></td>
+        <td class="small"><b>韩国</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-a">0-1 <i>10%</i></span><span class="ts ts-d">0-0 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.9-1.4</td>
+        <td class="small text-muted d-none d-md-table-cell">17/24/59</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">E</span></td>
+        <td class="small"><img class="fl" src="flags/h20-ec.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>厄瓜多尔</b>
+          <span class="text-muted">vs</span>
+          <b>德国</b> <img class="fl" src="flags/h20-de.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/26 周五 04:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:27"></i><i class="d" style="flex:26"></i><i class="l" style="flex:47"></i></div>
+          <div class="wdl-txt">27 / 26 / 47</div></td>
+        <td class="small"><b>德国</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>12%</i></span><span class="ts ts-d">0-0 <i>12%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.7-1.1</td>
+        <td class="small text-muted d-none d-md-table-cell">27/24/49</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">E</span></td>
+        <td class="small"><img class="fl" src="flags/h20-cw.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>库拉索</b>
+          <span class="text-muted">vs</span>
+          <b>科特迪瓦</b> <img class="fl" src="flags/h20-ci.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/26 周五 04:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:9"></i><i class="d" style="flex:16"></i><i class="l" style="flex:75"></i></div>
+          <div class="wdl-txt">9 / 16 / 75</div></td>
+        <td class="small"><b>科特迪瓦</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>12%</i></span><span class="ts ts-a">0-2 <i>12%</i></span><span class="ts ts-a">0-3 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.5-1.9</td>
+        <td class="small text-muted d-none d-md-table-cell">6/12/83</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">F</span></td>
+        <td class="small"><img class="fl" src="flags/h20-tn.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>突尼斯</b>
+          <span class="text-muted">vs</span>
+          <b>荷兰</b> <img class="fl" src="flags/h20-nl.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/26 周五 07:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:12"></i><i class="d" style="flex:17"></i><i class="l" style="flex:71"></i></div>
+          <div class="wdl-txt">12 / 17 / 71</div></td>
+        <td class="small"><b>荷兰</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>11%</i></span><span class="ts ts-a">0-2 <i>10%</i></span><span class="ts ts-d">1-1 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.7-1.7</td>
+        <td class="small text-muted d-none d-md-table-cell">5/11/84</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">F</span></td>
+        <td class="small"><img class="fl" src="flags/h20-jp.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>日本</b>
+          <span class="text-muted">vs</span>
+          <b>瑞典</b> <img class="fl" src="flags/h20-se.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/26 周五 07:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:47"></i><i class="d" style="flex:26"></i><i class="l" style="flex:27"></i></div>
+          <div class="wdl-txt">47 / 26 / 27</div></td>
+        <td class="small"><b>日本</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">1-0 <i>8%</i></span><span class="ts ts-d">0-0 <i>8%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.4-1.1</td>
+        <td class="small text-muted d-none d-md-table-cell">50/28/22</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">D</span></td>
+        <td class="small"><img class="fl" src="flags/h20-us.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>美国</b>
+          <span class="text-muted">vs</span>
+          <b>土耳其</b> <img class="fl" src="flags/h20-tr.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/26 周五 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:50"></i><i class="d" style="flex:21"></i><i class="l" style="flex:29"></i></div>
+          <div class="wdl-txt">50 / 21 / 29</div></td>
+        <td class="small"><b>美国</b>
+          <span class="score-chip">2-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>7%</i></span><span class="ts ts-h">2-1 <i>7%</i></span><span class="ts ts-d">2-2 <i>5%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">2.0-1.4</td>
+        <td class="small text-muted d-none d-md-table-cell">49/23/28</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">D</span></td>
+        <td class="small"><img class="fl" src="flags/h20-py.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>巴拉圭</b>
+          <span class="text-muted">vs</span>
+          <b>澳大利亚</b> <img class="fl" src="flags/h20-au.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/26 周五 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:35"></i><i class="d" style="flex:36"></i><i class="l" style="flex:29"></i></div>
+          <div class="wdl-txt">35 / 36 / 29</div></td>
+        <td class="small">平
+          <span class="score-chip">0-0</span></td>
+        <td><span class="ts ts-d">0-0 <i>14%</i></span><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.9-0.8</td>
+        <td class="small text-muted d-none d-md-table-cell">33/43/24</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">I</span></td>
+        <td class="small"><img class="fl" src="flags/h20-no.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>挪威</b>
+          <span class="text-muted">vs</span>
+          <b>法国</b> <img class="fl" src="flags/h20-fr.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/27 周六 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:23"></i><i class="d" style="flex:23"></i><i class="l" style="flex:54"></i></div>
+          <div class="wdl-txt">23 / 23 / 54</div></td>
+        <td class="small"><b>法国</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>9%</i></span><span class="ts ts-a">0-1 <i>9%</i></span><span class="ts ts-a">0-2 <i>8%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.9-1.7</td>
+        <td class="small text-muted d-none d-md-table-cell">23/25/53</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">I</span></td>
+        <td class="small"><img class="fl" src="flags/h20-sn.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>塞内加尔</b>
+          <span class="text-muted">vs</span>
+          <b>伊拉克</b> <img class="fl" src="flags/h20-iq.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/27 周六 03:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:65"></i><i class="d" style="flex:21"></i><i class="l" style="flex:14"></i></div>
+          <div class="wdl-txt">65 / 21 / 14</div></td>
+        <td class="small"><b>塞内加尔</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-h">2-0 <i>11%</i></span><span class="ts ts-d">0-0 <i>10%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.5-0.6</td>
+        <td class="small text-muted d-none d-md-table-cell">73/18/9</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">H</span></td>
+        <td class="small"><img class="fl" src="flags/h20-cv.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>佛得角</b>
+          <span class="text-muted">vs</span>
+          <b>沙特阿拉伯</b> <img class="fl" src="flags/h20-sa.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/27 周六 08:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:43"></i><i class="d" style="flex:26"></i><i class="l" style="flex:32"></i></div>
+          <div class="wdl-txt">43 / 26 / 32</div></td>
+        <td class="small"><b>佛得角</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">1-1 <i>11%</i></span><span class="ts ts-h">1-0 <i>11%</i></span><span class="ts ts-d">0-0 <i>10%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.2-0.9</td>
+        <td class="small text-muted d-none d-md-table-cell">42/25/33</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">H</span></td>
+        <td class="small"><img class="fl" src="flags/h20-uy.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>乌拉圭</b>
+          <span class="text-muted">vs</span>
+          <b>西班牙</b> <img class="fl" src="flags/h20-es.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/27 周六 08:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:16"></i><i class="d" style="flex:23"></i><i class="l" style="flex:61"></i></div>
+          <div class="wdl-txt">16 / 23 / 61</div></td>
+        <td class="small"><b>西班牙</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>13%</i></span><span class="ts ts-a">0-2 <i>11%</i></span><span class="ts ts-d">0-0 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.6-1.5</td>
+        <td class="small text-muted d-none d-md-table-cell">15/22/64</td>
+        <td class="small d-none d-md-table-cell"><span class="alt-badge" title="高原球场 Zapopan 1560m">🏔1560m</span></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">G</span></td>
+        <td class="small"><img class="fl" src="flags/h20-eg.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>埃及</b>
+          <span class="text-muted">vs</span>
+          <b>伊朗</b> <img class="fl" src="flags/h20-ir.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/27 周六 11:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:41"></i><i class="d" style="flex:31"></i><i class="l" style="flex:28"></i></div>
+          <div class="wdl-txt">41 / 31 / 28</div></td>
+        <td class="small"><b>埃及</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">0-0 <i>13%</i></span><span class="ts ts-h">1-0 <i>12%</i></span><span class="ts ts-d">1-1 <i>11%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.0-0.8</td>
+        <td class="small text-muted d-none d-md-table-cell">41/33/25</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">G</span></td>
+        <td class="small"><img class="fl" src="flags/h20-nz.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>新西兰</b>
+          <span class="text-muted">vs</span>
+          <b>比利时</b> <img class="fl" src="flags/h20-be.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/27 周六 11:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:13"></i><i class="d" style="flex:18"></i><i class="l" style="flex:69"></i></div>
+          <div class="wdl-txt">13 / 18 / 69</div></td>
+        <td class="small"><b>比利时</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-a">0-1 <i>11%</i></span><span class="ts ts-a">0-2 <i>10%</i></span><span class="ts ts-d">1-1 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.7-1.7</td>
+        <td class="small text-muted d-none d-md-table-cell">8/15/77</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">L</span></td>
+        <td class="small"><img class="fl" src="flags/h20-pa.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>巴拿马</b>
+          <span class="text-muted">vs</span>
+          <b>英格兰</b> <img class="fl" src="flags/h20-gb-eng.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/28 周日 05:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:9"></i><i class="d" style="flex:14"></i><i class="l" style="flex:77"></i></div>
+          <div class="wdl-txt">9 / 14 / 77</div></td>
+        <td class="small"><b>英格兰</b>
+          <span class="score-chip">0-2</span></td>
+        <td><span class="ts ts-a">0-2 <i>11%</i></span><span class="ts ts-a">0-3 <i>10%</i></span><span class="ts ts-a">0-1 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.5-2.5</td>
+        <td class="small text-muted d-none d-md-table-cell">10/13/76</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">L</span></td>
+        <td class="small"><img class="fl" src="flags/h20-hr.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>克罗地亚</b>
+          <span class="text-muted">vs</span>
+          <b>加纳</b> <img class="fl" src="flags/h20-gh.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/28 周日 05:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:56"></i><i class="d" style="flex:24"></i><i class="l" style="flex:20"></i></div>
+          <div class="wdl-txt">56 / 24 / 20</div></td>
+        <td class="small"><b>克罗地亚</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-h">1-0 <i>10%</i></span><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-h">2-0 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.5-0.8</td>
+        <td class="small text-muted d-none d-md-table-cell">58/25/17</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">K</span></td>
+        <td class="small"><img class="fl" src="flags/h20-cd.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>刚果(金)</b>
+          <span class="text-muted">vs</span>
+          <b>乌兹别克斯坦</b> <img class="fl" src="flags/h20-uz.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/28 周日 07:30</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:42"></i><i class="d" style="flex:30"></i><i class="l" style="flex:29"></i></div>
+          <div class="wdl-txt">42 / 30 / 29</div></td>
+        <td class="small"><b>刚果(金)</b>
+          <span class="score-chip">1-0</span></td>
+        <td><span class="ts ts-d">0-0 <i>20%</i></span><span class="ts ts-h">1-0 <i>16%</i></span><span class="ts ts-a">0-1 <i>13%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.7-0.5</td>
+        <td class="small text-muted d-none d-md-table-cell">45/26/29</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">K</span></td>
+        <td class="small"><img class="fl" src="flags/h20-co.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>哥伦比亚</b>
+          <span class="text-muted">vs</span>
+          <b>葡萄牙</b> <img class="fl" src="flags/h20-pt.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/28 周日 07:30</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:27"></i><i class="d" style="flex:24"></i><i class="l" style="flex:49"></i></div>
+          <div class="wdl-txt">27 / 24 / 49</div></td>
+        <td class="small"><b>葡萄牙</b>
+          <span class="score-chip">1-2</span></td>
+        <td><span class="ts ts-d">1-1 <i>8%</i></span><span class="ts ts-a">1-2 <i>7%</i></span><span class="ts ts-a">0-1 <i>7%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.2-1.8</td>
+        <td class="small text-muted d-none d-md-table-cell">26/27/46</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">J</span></td>
+        <td class="small"><img class="fl" src="flags/h20-dz.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>阿尔及利亚</b>
+          <span class="text-muted">vs</span>
+          <b>奥地利</b> <img class="fl" src="flags/h20-at.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/28 周日 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:33"></i><i class="d" style="flex:29"></i><i class="l" style="flex:38"></i></div>
+          <div class="wdl-txt">33 / 29 / 38</div></td>
+        <td class="small"><b>奥地利</b>
+          <span class="score-chip">0-1</span></td>
+        <td><span class="ts ts-d">1-1 <i>10%</i></span><span class="ts ts-d">0-0 <i>9%</i></span><span class="ts ts-a">0-1 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">1.0-1.2</td>
+        <td class="small text-muted d-none d-md-table-cell">30/32/37</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+      <tr>
+        <td class="d-none d-md-table-cell"><span class="gchip" style="width:1.15rem;height:1.15rem;font-size:.68rem">J</span></td>
+        <td class="small"><img class="fl" src="flags/h20-jo.png" alt="" loading="lazy" onerror="this.style.display='none'"> <b>约旦</b>
+          <span class="text-muted">vs</span>
+          <b>阿根廷</b> <img class="fl" src="flags/h20-ar.png" alt="" loading="lazy" onerror="this.style.display='none'">
+          <div class="ko-line">🕐 <b>6/28 周日 10:00</b></div></td>
+        <td><div class="wdl"><i class="w" style="flex:7"></i><i class="d" style="flex:14"></i><i class="l" style="flex:79"></i></div>
+          <div class="wdl-txt">7 / 14 / 79</div></td>
+        <td class="small"><b>阿根廷</b>
+          <span class="score-chip">0-2</span></td>
+        <td><span class="ts ts-a">0-2 <i>11%</i></span><span class="ts ts-a">0-3 <i>10%</i></span><span class="ts ts-a">0-1 <i>9%</i></span></td>
+        <td class="small num"></td>
+        <td class="small d-none d-md-table-cell">0.4-2.5</td>
+        <td class="small text-muted d-none d-md-table-cell">7/13/80</td>
+        <td class="small d-none d-md-table-cell"></td>
+      </tr>
+    
+    </tbody>
+  </table>
+  </div>
+  <p class="small text-muted d-md-none mt-2">📱 手机上只显示核心列（对阵·开球时间/胜平负/预测/Top3/实际）；横屏或电脑可看分组、xG、市场盘、海拔等全部列。开球时间为<b>北京时间</b>。</p>
+
+  
+  
+
+  <p class="footer-note mt-3">⚠️ 纯数据分析、娱乐参考。</p>
+</div>
+</body>
+</html>
